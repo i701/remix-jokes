@@ -2,14 +2,26 @@ import { PrismaClient } from "@prisma/client"
 const db = new PrismaClient()
 
 async function seed() {
-  const kody = await db.user.create({
-    data: {
-      username: "kody",
-      // this is a hashed version of "twixrox"
-      passwordHash:
-        "$2b$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu/1u",
-    },
-  })
+  const [kody, jake] = await db.$transaction([
+    db.user.create({
+      data: {
+        role: "ADMIN",
+        username: "kody",
+        // this is a hashed version of "twixrox"
+        passwordHash:
+          "$2b$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu/1u",
+      },
+    }),
+    db.user.create({
+      data: {
+        role: "PATIENT",
+        username: "jake",
+        // this is a hashed version of "twixrox"
+        passwordHash:
+          "$2b$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu/1u",
+      },
+    }),
+  ])
   await Promise.all(
     getJokes().map((joke) => {
       const data = { jokesterId: kody.id, ...joke }
